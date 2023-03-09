@@ -1,0 +1,7 @@
+March 9, 2023
+
+GPS Module
+- Todo: Figure out how to write code for it
+- Want to figure out how to get coordinates
+- circuitpython
+
