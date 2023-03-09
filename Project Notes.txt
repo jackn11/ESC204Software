@@ -1,7 +1,7 @@
 March 9, 2023
 
 GPS Module
-- Todo: Figure out how to write code for it
+- Todo: Ben test code
 - Want to figure out how to get coordinates
-- circuitpython
 
+Jack figure out scrolling text on LCD and best way to show farmer data
