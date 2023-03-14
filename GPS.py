@@ -1,31 +1,40 @@
+import time
 import board
 import busio
+
 import adafruit_gps
-import time
 
-# Set up UART serial communication with the GPS module
-uart = busio.UART(board.GP0, board.GP1, baudrate=9600, timeout=10)
 
-# Create a GPS object
-gps = adafruit_gps.GPS(uart)
+# connect GP0, GP1, 3.3V and GND:
+# https://www.waveshare.com/wiki/Pico-GPS-L76B
 
-# Turn on the basic GGA and RMC info (no need for other messages)
+RX = board.GP1
+TX = board.GP0
+
+uart = busio.UART(TX, RX, baudrate=9600, timeout=30)
+
+gps = adafruit_gps.GPS(uart, debug=False)
+
 gps.send_command(b'PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0')
+
 gps.send_command(b'PMTK220,1000')
 
-# Main loop
+last_print = time.monotonic()
 while True:
-    # Check if a GPS fix has been acquired
-    if gps.has_fix:
-        # Print out GPS data
+
+    gps.update()
+
+    current = time.monotonic()
+    if current - last_print >= 1.0:
+        last_print = current
+        if not gps.has_fix:
+            print('Waiting for fix...')
+            continue
+        print('=' * 40)  # Print a separator line.
         print('Latitude: {0:.6f} degrees'.format(gps.latitude))
         print('Longitude: {0:.6f} degrees'.format(gps.longitude))
         print('Altitude: {} meters'.format(gps.altitude_m))
         print('Speed: {} knots'.format(gps.speed_knots))
         print('Heading: {} degrees'.format(gps.track_angle_deg))
         print('Timestamp: {}'.format(gps.timestamp_utc))
-    else:
-        print('Waiting for fix...')
 
-    # Wait a bit before checking again
-    time.sleep(1.0)
