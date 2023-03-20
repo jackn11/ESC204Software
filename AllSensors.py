@@ -1,42 +1,4 @@
-'''
-import time
-import board
-import busio
-
-import adafruit_gps
-
-RX = board.GP1
-TX = board.GP0
-
-uart = busio.UART(TX, RX, baudrate=9600, timeout=30)
-
-gps = adafruit_gps.GPS(uart, debug=False)
-
-gps.send_command(b'PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0')
-
-gps.send_command(b'PMTK220,1000')
-
-last_print = time.monotonic()
-while True:
-
-    gps.update()
-
-    current = time.monotonic()
-    if current - last_print >= 1.0:
-        last_print = current
-        if not gps.has_fix:
-            print('Waiting for fix...')
-            continue
-        print('=' * 40)  # Print a separator line.
-        print('Latitude: {0:.6f} degrees'.format(gps.latitude))
-        print('Longitude: {0:.6f} degrees'.format(gps.longitude))
-        print('Altitude: {} meters'.format(gps.altitude_m))
-        print('Speed: {} knots'.format(gps.speed_knots))
-        print('Heading: {} degrees'.format(gps.track_angle_deg))
-        print('Timestamp: {}'.format(gps.timestamp_utc))
-'''
-
-# currently, 3 sensors work together but when running with GPS, it prints out one iteration of the loop and then stops working, must debug this
+# all 4 work together
 
 #DHT SENSOR
 import board
@@ -83,6 +45,7 @@ photoresistor = analogio.AnalogIn(photoresistor_pin)
 ADC_REF = photoresistor.reference_voltage
 print("ADC reference voltage: {}".format(ADC_REF))
 print("ADC high voltage integer value: {}".format(ADC_HIGH))
+print('=' * 40)  # Print a separator line.
 # convert ADC input value back to voltage
 def adc_to_voltage(adc_value):
     return  ADC_REF * (float(adc_value)/float(ADC_HIGH))
@@ -105,13 +68,24 @@ dhtDevice = adafruit_am2320.AM2320(i2c)
 # read values from AM2320 sensor every 2 seconds
 # (with gap in between temp and humidity readings)
 while True:
-    
-    '''GPS
+
     gps.update()
-    '''
-    
-    
+
     print('=' * 40)  # Print a separator line.
+    current = time.monotonic()
+    if current - last_print >= 1.0:
+        last_print = current
+        if not gps.has_fix:
+            print('Waiting for fix...')
+            continue
+        print('Latitude: {0:.6f} degrees'.format(gps.latitude))
+        print('Longitude: {0:.6f} degrees'.format(gps.longitude))
+        print('Altitude: {} meters'.format(gps.altitude_m))
+        print('Speed: {} knots'.format(gps.speed_knots))
+        print('Heading: {} degrees'.format(gps.track_angle_deg))
+        print('Timestamp: {}'.format(gps.timestamp_utc))
+
+
     try:
         # Print the values to the serial port
         temp_c = dhtDevice.temperature
@@ -126,7 +100,6 @@ while True:
         # Replacing bitbangio with busio can also sometimes help
         print(error.args[0])
 
-
     # PHOTORESISTOR STUFF
     # read adc value and print
     if mode == INT_MODE:
@@ -134,7 +107,6 @@ while True:
     # convert to voltage
     else:
         print((adc_to_voltage(photoresistor.value),))
-
 
     # SOIL MOISTURE
     moisture = soil_value.value
@@ -148,24 +120,31 @@ while True:
     else:
         print("Soil is in water/wet!")
 
-
-
-''' GPS
-    current = time.monotonic()
-    if current - last_print >= 1.0:
-        last_print = current
-        if not gps.has_fix:
-            print('Waiting for fix...')
-            continue
-        print('=' * 40)  # Print a separator line.
-        print('Latitude: {0:.6f} degrees'.format(gps.latitude))
-        print('Longitude: {0:.6f} degrees'.format(gps.longitude))
-        print('Altitude: {} meters'.format(gps.altitude_m))
-        print('Speed: {} knots'.format(gps.speed_knots))
-        print('Heading: {} degrees'.format(gps.track_angle_deg))
-        print('Timestamp: {}'.format(gps.timestamp_utc))
-'''
-
-
     time.sleep(3.0)
 
+
+'''
+# SD card testing
+import adafruit_sdcard
+import busio
+import digitalio
+import board
+import storage
+
+# Connect to the card and mount the filesystem.
+spi = busio.SPI(board.GP6, board.GP7, board.GP4)
+cs = digitalio.DigitalInOut(board.GP5)
+sdcard = adafruit_sdcard.SDCard(spi, cs)
+vfs = storage.VfsFat(sdcard)
+storage.mount(vfs, "/sd")
+
+# Create a file in write mode and write something
+with open("/sd/sdtest.txt", "w") as file:
+    file.write("Hello World!\r\n")
+    file.write("This is a test\r\n")
+
+# Open the file in read mode and read from it
+with open("/sd/sdtest.txt", "r") as file:
+    data = file.read()
+    print(data)
+'''
