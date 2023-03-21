@@ -10,6 +10,21 @@ import time
 import adafruit_gps
 import busio
 
+# SD card testing
+import adafruit_sdcard
+import digitalio
+import storage
+# Connect to the card and mount the filesystem.
+spi = busio.SPI(board.GP6, board.GP7, board.GP4) #sck, mosi, miso
+cs = digitalio.DigitalInOut(board.GP5)
+sdcard = adafruit_sdcard.SDCard(spi, cs)
+vfs = storage.VfsFat(sdcard)
+storage.mount(vfs, "/sd")
+
+# Create a file in write mode and write something
+with open("/sd/data.txt", "w") as file:
+    file.write("temperature,humidity,photoresistor,soilmoisture\r\n")
+
 RX = board.GP1
 TX = board.GP0
 
@@ -65,13 +80,20 @@ soil_value = analogio.AnalogIn(soil)
 i2c = bitbangio.I2C(board.GP17, board.GP16)
 dhtDevice = adafruit_am2320.AM2320(i2c)
 
+
+
+
+
+
 # read values from AM2320 sensor every 2 seconds
 # (with gap in between temp and humidity readings)
 while True:
+    print('=' * 40)  # Print a separator line.
+    
+    '''
 
     gps.update()
-
-    print('=' * 40)  # Print a separator line.
+    
     current = time.monotonic()
     if current - last_print >= 1.0:
         last_print = current
@@ -84,6 +106,7 @@ while True:
         print('Speed: {} knots'.format(gps.speed_knots))
         print('Heading: {} degrees'.format(gps.track_angle_deg))
         print('Timestamp: {}'.format(gps.timestamp_utc))
+    '''
 
 
     try:
@@ -111,7 +134,8 @@ while True:
     # SOIL MOISTURE
     moisture = soil_value.value
     print("Soil Moisture Value:", moisture)
-
+    
+    '''
     # SOIL MOISTURE
     if moisture <= 300:
         print("Soil is dry!")
@@ -119,8 +143,13 @@ while True:
         print("Soil is moist!")
     else:
         print("Soil is in water/wet!")
-
-    time.sleep(3.0)
+        '''
+        
+    # WRITE TO SD CARD
+    # Append information to a file
+    with open("/sd/data.txt", "a") as file:
+        file.write("{},{},{},{}\r\n".format(temp_c,hum,photoresistor.value,moisture))
+    time.sleep(5.0)
 
 
 '''
@@ -132,7 +161,7 @@ import board
 import storage
 
 # Connect to the card and mount the filesystem.
-spi = busio.SPI(board.GP6, board.GP7, board.GP4)
+spi = busio.SPI(board.GP6, board.GP7, board.GP4) #sck, mosi, miso
 cs = digitalio.DigitalInOut(board.GP5)
 sdcard = adafruit_sdcard.SDCard(spi, cs)
 vfs = storage.VfsFat(sdcard)
@@ -142,6 +171,10 @@ storage.mount(vfs, "/sd")
 with open("/sd/sdtest.txt", "w") as file:
     file.write("Hello World!\r\n")
     file.write("This is a test\r\n")
+
+# Append information to a file
+with open("/sd/sdtest.txt", "a") as file:
+    file.write("With even more information!\r\n")
 
 # Open the file in read mode and read from it
 with open("/sd/sdtest.txt", "r") as file:
