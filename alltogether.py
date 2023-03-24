@@ -185,7 +185,9 @@ while True:
 # returns when detects button press
 # def process_data(data_to_display)
 
-# def display_info()
+def display_info()
+	# if button_pressed
+		# return
 
 # Open the file in read mode and read from it
 with open("/sd/sdtest.txt", "r") as file:
