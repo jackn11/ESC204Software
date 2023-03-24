@@ -33,6 +33,7 @@ def display_info(data_arr, button, prev, down_up, button2):
         prev = cur
         
         lcd.message = str(data_arr[state])
+            
         #BUTTON 2
         # Set variable cur to be the current button value at that given moment
         cur2 = button2.value
@@ -224,6 +225,8 @@ while True:
 
     print('=' * 40)  # Print a separator line.
     '''
+
+
     gps_is_plugged_in = False
 
     if gps_is_plugged_in:
@@ -234,16 +237,16 @@ while True:
             if not gps.has_fix:
                 print('Waiting for fix...')
                 continue
-		
-	    lattitude = gps.latitude
-	    longitude = gps.longitude
-	    altitude = gps.altitude_m
-	    #these next couple lines may be sketch
-	    year = gps.timestamp_utc.tm_year
-	    month = gps.timestamp_utc.tm_mon
-	    day = gps.timestamp_utc.tm_mday
-	    hour = gps.timestamp_utc.tm_hour
-		
+                
+            latitude = gps.latitude
+            longitude = gps.longitude
+            altitude = gps.altitude_m
+            #these next couple lines may be sketch
+            year = gps.timestamp_utc.tm_year
+            month = gps.timestamp_utc.tm_mon
+            day = gps.timestamp_utc.tm_mday
+            hour = gps.timestamp_utc.tm_hour
+            
             print('Latitude: {0:.6f} degrees'.format(gps.latitude))
             print('Longitude: {0:.6f} degrees'.format(gps.longitude))
             print('Altitude: {} meters'.format(gps.altitude_m))
@@ -299,7 +302,7 @@ while True:
     # WRITE TO SD CARD
     # Append information to a file
     with open("/sd/data.txt", "a") as file:
-        file.write("{},{},{},{}\r\n".format(temp_c,hum,photoresistor.value,moisture,lattitude,longitude,altitude,year,month,day,hour))
+        file.write("{},{},{},{},{},{},{},{},{},{},{}\r\n".format(temp_c,hum,photoresistor.value,moisture,lattitude,longitude,altitude,year,month,day,hour))
     time.sleep(0.1)
 
 
