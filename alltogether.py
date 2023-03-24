@@ -1,9 +1,10 @@
 # FUNCTIONS TO PROCESS AND DISPLAY DATA
 # data_to_display is string array
 # returns when detects button press
-# def process_data(data_to_display)
+def process_data(data_to_display)
+	return data_arr = ["1          ", "2          ", "3          ", "4          "]
 
-def display_info(test, button, prev, down_up, button2):
+def display_info(data_arr, button, prev, down_up, button2):
     # BUTTON 2
     # Set variable prev to be the initial button value to keep track of current button state
     prev2 = button2.value
@@ -31,7 +32,7 @@ def display_info(test, button, prev, down_up, button2):
 
         prev = cur
         
-        lcd.message = str(test[state])
+        lcd.message = str(data_arr[state])
         #BUTTON 2
         # Set variable cur to be the current button value at that given moment
         cur2 = button2.value
@@ -43,14 +44,14 @@ def display_info(test, button, prev, down_up, button2):
             # If cur is True, that means the button is currently up, meaning the button has been released after a press
             else:
                 down_up2 = True # In this else block, prev = False and cur = True, meaning the button has been pressed and has just been released, so we set down_up to be True
-                if state != 3:
+                if state != len(data_arr):
                     state += 1
                 else:
                     state = 0
         prev2 = cur2
 
         if down_up2:
-            lcd.message = str(test[state])
+            lcd.message = str(data_arr[state])
 
         if down_up:
             return
@@ -208,9 +209,8 @@ while True:
     prev = cur
 
     if down_up:
-        test = ["1          ", "2          ", "3          ", "4          "]
         down_up = False
-        display_info(test, button, prev, down_up, button2)
+        display_info(process_data(), button, prev, down_up, button2)
 
     lcd.message = str("OUT OF FUNC")
 
