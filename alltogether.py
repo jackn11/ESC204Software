@@ -90,7 +90,7 @@ storage.mount(vfs, "/sd")
 
 # Create a file in write mode and write something
 with open("/sd/data.txt", "w") as file:
-    file.write("temperature,humidity,photoresistor,soilmoisture\r\n")
+    file.write("temperature,humidity,photoresistor,soilmoisture,latitude,longitude,altitude,year,month,day,hour\r\n")
 
 RX = board.GP1
 TX = board.GP0
@@ -224,23 +224,24 @@ while True:
 
     print('=' * 40)  # Print a separator line.
     '''
+    gps_is_plugged_in = False
 
-
-    '''
-    gps.update()
-    current = time.monotonic()
-    if current - last_print >= 1.0:
-        last_print = current
-        if not gps.has_fix:
-            print('Waiting for fix...')
-            continue
-        print('Latitude: {0:.6f} degrees'.format(gps.latitude))
-        print('Longitude: {0:.6f} degrees'.format(gps.longitude))
-        print('Altitude: {} meters'.format(gps.altitude_m))
-        print('Speed: {} knots'.format(gps.speed_knots))
-        print('Heading: {} degrees'.format(gps.track_angle_deg))
-        print('Timestamp: {}'.format(gps.timestamp_utc))
-    '''
+    if gps_is_plugged_in:
+        gps.update()
+        current = time.monotonic()
+        if current - last_print >= 1.0:
+            last_print = current
+            if not gps.has_fix:
+                print('Waiting for fix...')
+                continue
+            print('Latitude: {0:.6f} degrees'.format(gps.latitude))
+            print('Longitude: {0:.6f} degrees'.format(gps.longitude))
+            print('Altitude: {} meters'.format(gps.altitude_m))
+            print('Speed: {} knots'.format(gps.speed_knots))
+            print('Heading: {} degrees'.format(gps.track_angle_deg))
+            print('Timestamp: {}'.format(gps.timestamp_utc))
+    else:
+        lattitude,longitude,altitude,year,month,day,hour = 43.65, -79.39, 87.3, 2023, 3, 14, 15
 
     
     try:
@@ -288,7 +289,7 @@ while True:
     # WRITE TO SD CARD
     # Append information to a file
     with open("/sd/data.txt", "a") as file:
-        file.write("{},{},{},{}\r\n".format(temp_c,hum,photoresistor.value,moisture))
+        file.write("{},{},{},{}\r\n".format(temp_c,hum,photoresistor.value,moisture,lattitude,longitude,altitude,year,month,day,hour))
     time.sleep(0.1)
 
 
