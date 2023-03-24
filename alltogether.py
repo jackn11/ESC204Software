@@ -234,6 +234,16 @@ while True:
             if not gps.has_fix:
                 print('Waiting for fix...')
                 continue
+		
+	    lattitude = gps.latitude
+	    longitude = gps.longitude
+	    altitude = gps.altitude_m
+	    #these next couple lines may be sketch
+	    year = gps.timestamp_utc.tm_year
+	    month = gps.timestamp_utc.tm_mon
+	    day = gps.timestamp_utc.tm_mday
+	    hour = gps.timestamp_utc.tm_hour
+		
             print('Latitude: {0:.6f} degrees'.format(gps.latitude))
             print('Longitude: {0:.6f} degrees'.format(gps.longitude))
             print('Altitude: {} meters'.format(gps.altitude_m))
