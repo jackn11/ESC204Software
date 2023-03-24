@@ -1,8 +1,8 @@
 # FUNCTIONS TO PROCESS AND DISPLAY DATA
 # data_to_display is string array
 # returns when detects button press
-def process_data(data_to_display)
-	return data_arr = ["1          ", "2          ", "3          ", "4          "]
+def process_data():
+    return ["1          ", "2          ", "3          ", "4          "]
 
 def display_info(data_arr, button, prev, down_up, button2):
     # BUTTON 2
@@ -44,7 +44,7 @@ def display_info(data_arr, button, prev, down_up, button2):
             # If cur is True, that means the button is currently up, meaning the button has been released after a press
             else:
                 down_up2 = True # In this else block, prev = False and cur = True, meaning the button has been pressed and has just been released, so we set down_up to be True
-                if state != len(data_arr):
+                if state != (len(data_arr)-1):
                     state += 1
                 else:
                     state = 0
