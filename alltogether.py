@@ -112,6 +112,11 @@ lcd = characterlcd.Character_LCD_Mono(lcd_rs, lcd_en, lcd_d4, lcd_d5, lcd_d6, lc
 # read values from AM2320 sensor every 2 seconds
 # (with gap in between temp and humidity readings)
 while True:
+    
+    # if button_pressed:
+    #	data_to_display = process_data() # string array
+    #	display_info(data_to_display)
+    
     print('=' * 40)  # Print a separator line.
 
     '''
@@ -176,30 +181,11 @@ while True:
     lcd.message = str(moisture)
     time.sleep(5.0)
 
+# data_to_display is string array
+# returns when detects button press
+# def process_data(data_to_display)
 
-'''
-# SD card testing
-import adafruit_sdcard
-import busio
-import digitalio
-import board
-import storage
-
-# Connect to the card and mount the filesystem.
-spi = busio.SPI(board.GP6, board.GP7, board.GP4) #sck, mosi, miso
-cs = digitalio.DigitalInOut(board.GP5)
-sdcard = adafruit_sdcard.SDCard(spi, cs)
-vfs = storage.VfsFat(sdcard)
-storage.mount(vfs, "/sd")
-
-# Create a file in write mode and write something
-with open("/sd/sdtest.txt", "w") as file:
-    file.write("Hello World!\r\n")
-    file.write("This is a test\r\n")
-
-# Append information to a file
-with open("/sd/sdtest.txt", "a") as file:
-    file.write("With even more information!\r\n")
+# def display_info()
 
 # Open the file in read mode and read from it
 with open("/sd/sdtest.txt", "r") as file:
