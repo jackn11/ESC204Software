@@ -1,4 +1,65 @@
-# Jack Naimer
+# FUNCTIONS TO PROCESS AND DISPLAY DATA
+# data_to_display is string array
+# returns when detects button press
+# def process_data(data_to_display)
+
+def display_info(test, button, prev, down_up, button2):
+    # BUTTON 2
+    # Set variable prev to be the initial button value to keep track of current button state
+    prev2 = button2.value
+    # Initialize variable down_up to be True, this keeps track of whether or not the button has been pressed and released
+    down_up2 = False
+    # initialize state
+    state = 0
+    
+    
+    
+    
+    
+    while True:
+        # BUTTON 1
+        # Set variable cur to be the current button value at that given moment
+        cur = button.value
+        # If cur does not equal prev, there has been a change of the button state
+        if cur != prev:
+            # If cur is False, that means the button is currently down, meaning the button has been pressed
+            if not cur:
+                down_up = False # The down_up variable is set to False, as the press-release pattern has not yet been detected
+            # If cur is True, that means the button is currently up, meaning the button has been released after a press
+            else:
+                down_up = True # In this else block, prev = False and cur = True, meaning the button has been pressed and has just been released, so we set down_up to be True
+
+        prev = cur
+        
+        lcd.message = str(test[state])
+        #BUTTON 2
+        # Set variable cur to be the current button value at that given moment
+        cur2 = button2.value
+        # If cur does not equal prev, there has been a change of the button state
+        if cur2 != prev2:
+            # If cur is False, that means the button is currently down, meaning the button has been pressed
+            if not cur2:
+                down_up2 = False # The down_up variable is set to False, as the press-release pattern has not yet been detected
+            # If cur is True, that means the button is currently up, meaning the button has been released after a press
+            else:
+                down_up2 = True # In this else block, prev = False and cur = True, meaning the button has been pressed and has just been released, so we set down_up to be True
+                if state != 3:
+                    state += 1
+                else:
+                    state = 0
+        prev2 = cur2
+
+        if down_up2:
+            lcd.message = str(test[state])
+
+        if down_up:
+            return
+
+
+
+
+
+# Jack Naimer AND BENJAMIN MAH :)
 
 import adafruit_character_lcd.character_lcd as characterlcd
 
@@ -108,21 +169,65 @@ lcd = characterlcd.Character_LCD_Mono(lcd_rs, lcd_en, lcd_d4, lcd_d5, lcd_d6, lc
 # end of good stuff
 
 
+# BUTTON 1 - TO STOP COLLECTING DATA AND MOVE TO PROCESS DATA FUNCTION
+# Assing internal GPIO as button input
+button = digitalio.DigitalInOut(board.GP11)
+button.direction = digitalio.Direction.INPUT
+button.pull = digitalio.Pull.UP # Configure the internal resistor to pull-up
+# Set variable prev to be the initial button value to keep track of current button state
+prev = button.value
+# Initialize variable down_up to be True, this keeps track of whether or not the button has been pressed and released
+down_up = False
+
+
+# BUTTON 2 - TO CYCLE THROUGH PROCESSED DATA, WILL BE USED IN DISPLAY INFO FUNCTION
+# Assing internal GPIO as button input
+button2 = digitalio.DigitalInOut(board.GP12)
+button2.direction = digitalio.Direction.INPUT
+button2.pull = digitalio.Pull.UP # Configure the internal resistor to pull-up
+
 
 # read values from AM2320 sensor every 2 seconds
 # (with gap in between temp and humidity readings)
 while True:
     
+    # KEEP TRACK OF TIME FOR SENSOR SO IT DOESN'T COLLECT EVERY SINGLE MILLISECOND
+    #start_time = time.monotonic()
+
+    # BUTTON 1
+    # Set variable cur to be the current button value at that given moment
+    cur = button.value
+    # If cur does not equal prev, there has been a change of the button state
+    if cur != prev:
+        # If cur is False, that means the button is currently down, meaning the button has been pressed
+        if not cur:
+            down_up = False # The down_up variable is set to False, as the press-release pattern has not yet been detected
+        # If cur is True, that means the button is currently up, meaning the button has been released after a press
+        else:
+            down_up = True # In this else block, prev = False and cur = True, meaning the button has been pressed and has just been released, so we set down_up to be True
+    prev = cur
+
+    if down_up:
+        test = ["1          ", "2          ", "3          ", "4          "]
+        down_up = False
+        display_info(test, button, prev, down_up, button2)
+
+    lcd.message = str("OUT OF FUNC")
+
+
+
+
     # if button_pressed:
     #	data_to_display = process_data() # string array
     #	display_info(data_to_display)
-    
-    print('=' * 40)  # Print a separator line.
-
     '''
 
-    gps.update()
+    print('=' * 40)  # Print a separator line.
+    '''
 
+
+    '''
+    gps.update()
     current = time.monotonic()
     if current - last_print >= 1.0:
         last_print = current
@@ -137,7 +242,7 @@ while True:
         print('Timestamp: {}'.format(gps.timestamp_utc))
     '''
 
-
+    
     try:
         # Print the values to the serial port
         temp_c = dhtDevice.temperature
@@ -151,7 +256,9 @@ while True:
         # If errors are persistent, increase sleep times
         # Replacing bitbangio with busio can also sometimes help
         print(error.args[0])
+    
 
+    
     # PHOTORESISTOR STUFF
     # read adc value and print
     if mode == INT_MODE:
@@ -159,12 +266,15 @@ while True:
     # convert to voltage
     else:
         print((adc_to_voltage(photoresistor.value),))
+    
 
+    
     # SOIL MOISTURE
     moisture = soil_value.value
     print("Soil Moisture Value:", moisture)
+    
 
-    '''
+    
     # SOIL MOISTURE
     if moisture <= 300:
         print("Soil is dry!")
@@ -172,26 +282,22 @@ while True:
         print("Soil is moist!")
     else:
         print("Soil is in water/wet!")
-        '''
+        
 
+    
     # WRITE TO SD CARD
     # Append information to a file
     with open("/sd/data.txt", "a") as file:
         file.write("{},{},{},{}\r\n".format(temp_c,hum,photoresistor.value,moisture))
-    lcd.message = str(moisture)
-    time.sleep(5.0)
+    time.sleep(0.1)
 
-# data_to_display is string array
-# returns when detects button press
-# def process_data(data_to_display)
 
-def display_info()
-	# if button_pressed
-		# return
 
+
+
+'''
 # Open the file in read mode and read from it
 with open("/sd/sdtest.txt", "r") as file:
     data = file.read()
     print(data)
 '''
-
