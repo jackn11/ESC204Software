@@ -1,9 +1,10 @@
+
 # FUNCTIONS TO PROCESS AND DISPLAY DATA
 # data_to_display is string array
 # returns when detects button press
 def process_data():
-    return ["1          ", "2          ", "3          ", "4          "]
-
+    return ["SUGGESTION 1              \n                ", "SUGGESTION 2             \n             ", "SUGGESTION 3            \n            ", "SUGGESTION 4             \n            "]
+  
 def display_info(data_arr, button, prev, down_up, button2):
     # BUTTON 2
     # Set variable prev to be the initial button value to keep track of current button state
@@ -12,11 +13,11 @@ def display_info(data_arr, button, prev, down_up, button2):
     down_up2 = False
     # initialize state
     state = 0
-    
-    
-    
-    
-    
+
+
+
+
+
     while True:
         # BUTTON 1
         # Set variable cur to be the current button value at that given moment
@@ -31,9 +32,9 @@ def display_info(data_arr, button, prev, down_up, button2):
                 down_up = True # In this else block, prev = False and cur = True, meaning the button has been pressed and has just been released, so we set down_up to be True
 
         prev = cur
-        
+
         lcd.message = str(data_arr[state])
-            
+
         #BUTTON 2
         # Set variable cur to be the current button value at that given moment
         cur2 = button2.value
@@ -82,6 +83,7 @@ import busio
 import adafruit_sdcard
 import digitalio
 import storage
+
 # Connect to the card and mount the filesystem.
 spi = busio.SPI(board.GP6, board.GP7, board.GP4) #sck, mosi, miso
 cs = digitalio.DigitalInOut(board.GP5)
@@ -150,25 +152,28 @@ i2c = bitbangio.I2C(board.GP17, board.GP16)
 dhtDevice = adafruit_am2320.AM2320(i2c)
 
 
-#the good stuff
+#the good stuffs
 # Define LCD column and row size for 16x2 LCD.
 lcd_columns = 16
 lcd_rows = 2
 
 # Define the pins for the LCD.
-lcd_rs = digitalio.DigitalInOut(board.GP2)
-lcd_en = digitalio.DigitalInOut(board.GP3)
-lcd_d4 = digitalio.DigitalInOut(board.GP18)
-lcd_d5 = digitalio.DigitalInOut(board.GP19)
-lcd_d6 = digitalio.DigitalInOut(board.GP20)
-lcd_d7 = digitalio.DigitalInOut(board.GP21)
+lcd_rs = digitalio.DigitalInOut(board.GP2) #GP2
+lcd_en = digitalio.DigitalInOut(board.GP3) #GP3
+lcd_d4 = digitalio.DigitalInOut(board.GP18) #GP18
+lcd_d5 = digitalio.DigitalInOut(board.GP19) #19
+lcd_d6 = digitalio.DigitalInOut(board.GP20) #20
+lcd_d7 = digitalio.DigitalInOut(board.GP21) #21
 
 # Initialize the LCD class.
 lcd = characterlcd.Character_LCD_Mono(lcd_rs, lcd_en, lcd_d4, lcd_d5, lcd_d6, lcd_d7, lcd_columns, lcd_rows)
 
+'''
 # Print a message to the LCD.
-#lcd.message = "Hello, CircuitPy\nthon!"
+lcd.message = "TEST"
+lcd.message = "Hello, CircuitPy\nthon!"
 # end of good stuff
+'''
 
 
 # BUTTON 1 - TO STOP COLLECTING DATA AND MOVE TO PROCESS DATA FUNCTION
@@ -191,8 +196,16 @@ button2.pull = digitalio.Pull.UP # Configure the internal resistor to pull-up
 
 # read values from AM2320 sensor every 2 seconds
 # (with gap in between temp and humidity readings)
+
+# loading counter
+counter = 0
 while True:
     
+    if counter == 2:
+        counter = 0
+    else:
+        counter += 1
+        
     # KEEP TRACK OF TIME FOR SENSOR SO IT DOESN'T COLLECT EVERY SINGLE MILLISECOND
     #start_time = time.monotonic()
 
@@ -213,7 +226,12 @@ while True:
         down_up = False
         display_info(process_data(), button, prev, down_up, button2)
 
-    lcd.message = str("OUT OF FUNC")
+    if counter == 0:
+        lcd.message = str("Collecting      \nData.      ")
+    elif counter == 1:
+        lcd.message = str("Collecting      \nData..     ")
+    else:
+        lcd.message = str("Collecting      \nData...    ")
 
 
 
@@ -221,10 +239,10 @@ while True:
     # if button_pressed:
     #	data_to_display = process_data() # string array
     #	display_info(data_to_display)
-    '''
+
 
     print('=' * 40)  # Print a separator line.
-    '''
+
 
 
     gps_is_plugged_in = False
@@ -237,7 +255,7 @@ while True:
             if not gps.has_fix:
                 print('Waiting for fix...')
                 continue
-                
+
             latitude = gps.latitude
             longitude = gps.longitude
             altitude = gps.altitude_m
@@ -246,7 +264,7 @@ while True:
             month = gps.timestamp_utc.tm_mon
             day = gps.timestamp_utc.tm_mday
             hour = gps.timestamp_utc.tm_hour
-            
+
             print('Latitude: {0:.6f} degrees'.format(gps.latitude))
             print('Longitude: {0:.6f} degrees'.format(gps.longitude))
             print('Altitude: {} meters'.format(gps.altitude_m))
@@ -256,7 +274,7 @@ while True:
     else:
         lattitude,longitude,altitude,year,month,day,hour = 43.65, -79.39, 87.3, 2023, 3, 14, 15
 
-    
+
     try:
         # Print the values to the serial port
         temp_c = dhtDevice.temperature
@@ -270,9 +288,9 @@ while True:
         # If errors are persistent, increase sleep times
         # Replacing bitbangio with busio can also sometimes help
         print(error.args[0])
-    
 
-    
+
+
     # PHOTORESISTOR STUFF
     # read adc value and print
     if mode == INT_MODE:
@@ -280,15 +298,15 @@ while True:
     # convert to voltage
     else:
         print((adc_to_voltage(photoresistor.value),))
-    
 
-    
+
+
     # SOIL MOISTURE
     moisture = soil_value.value
     print("Soil Moisture Value:", moisture)
-    
 
-    
+
+
     # SOIL MOISTURE
     if moisture <= 300:
         print("Soil is dry!")
@@ -296,15 +314,25 @@ while True:
         print("Soil is moist!")
     else:
         print("Soil is in water/wet!")
-        
 
-    
+
+
     # WRITE TO SD CARD
     # Append information to a file
     with open("/sd/data.txt", "a") as file:
         file.write("{},{},{},{},{},{},{},{},{},{},{}\r\n".format(temp_c,hum,photoresistor.value,moisture,lattitude,longitude,altitude,year,month,day,hour))
     time.sleep(0.1)
 
+
+
+
+
+'''
+# Open the file in read mode and read from it
+with open("/sd/sdtest.txt", "r") as file:
+    data = file.read()
+    print(data)
+'''
 
 
 
