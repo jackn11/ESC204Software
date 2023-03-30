@@ -2,10 +2,32 @@
 # FUNCTIONS TO PROCESS AND DISPLAY DATA
 # data_to_display is string array
 # returns when detects button press
+
+def parse_csv():
+    with open("/sd/data.txt", "r") as f:
+        lines = f.readlines()
+        headers = lines[0].strip().split(',')
+        data = {header: [] for header in headers}
+        for line in lines[1:]:
+            values = line.strip().split(',')
+            for i, value in enumerate(values):
+                data[headers[i]].append(float(value))
+    return data
+
 def process_data():
-    return ["SUGGESTION 1              \n                ", "SUGGESTION 2             \n             ", "SUGGESTION 3            \n            ", "SUGGESTION 4             \n            "]
-  
+    data = parse_csv()
+    avg_temp = round(sum(data["temperature"])/len(data["temperature"]), 2)
+    min_soil_ind = data["soilmoisture"].index(min(data["soilmoisture"]))
+    min_soil_lat = data["latitude"][min_soil_ind]
+    min_soil_long = data["longitude"][min_soil_ind]
+    return ["yield est: "+str(avg_temp), "water soil at: ("+str(min_soil_lat)+", "+str(min_soil_long)+")", "ideal crop to grow: "+"casava"]
+
 def display_info(data_arr, button, prev, down_up, button2):
+    
+    # Processing screen
+    lcd.message = ("Processing...          \n                ")
+    time.sleep(0.5)
+    
     # BUTTON 2
     # Set variable prev to be the initial button value to keep track of current button state
     prev2 = button2.value
@@ -13,8 +35,8 @@ def display_info(data_arr, button, prev, down_up, button2):
     down_up2 = False
     # initialize state
     state = 0
-
-
+    
+    flag = False
 
 
 
@@ -33,7 +55,13 @@ def display_info(data_arr, button, prev, down_up, button2):
 
         prev = cur
 
-        lcd.message = str(data_arr[state])
+        if len(data_arr[state]) >= 16 and flag == False:
+            print_long_message(data_arr[state])
+            flag = True
+        elif len(data_arr[state]) >= 16 and flag == True:
+            lcd.message = str(data_arr[state][-16:] + "\n                ")
+        else:
+            lcd.message = str(data_arr[state])
 
         #BUTTON 2
         # Set variable cur to be the current button value at that given moment
@@ -48,18 +76,46 @@ def display_info(data_arr, button, prev, down_up, button2):
                 down_up2 = True # In this else block, prev = False and cur = True, meaning the button has been pressed and has just been released, so we set down_up to be True
                 if state != (len(data_arr)-1):
                     state += 1
+                    flag = False
                 else:
                     state = 0
+                    flag = False
         prev2 = cur2
-
-        if down_up2:
+        
+        
+        if down_up2 and len(data_arr[state]) >= 16 and flag == False:
+            print_long_message(data_arr[state])
+            flag = True
+        elif down_up2 and len(data_arr[state]) >= 16 and flag == True:
+            lcd.message = str(data_arr[state][-16:] +"\n                ")
+        elif down_up2:
             lcd.message = str(data_arr[state])
+        else:
+            pass
+        
 
         if down_up:
             return
+            
+        
 
 
-
+def print_long_message(message):
+    x = 0
+    y = 16
+    
+    for i in range(0, len(message)-16):
+        x = i
+        lcd.message = (message[x:y] + "\n                ")
+        y += 1
+        time.sleep(0.5) # Increase the sleep time to slow down the scroll speed
+        
+    
+    # Display the remainder of the message
+    lcd.message = (message[x:] + " \n          ")
+    
+    return
+        
 
 
 # Jack Naimer AND BENJAMIN MAH :)
@@ -200,12 +256,12 @@ button2.pull = digitalio.Pull.UP # Configure the internal resistor to pull-up
 # loading counter
 counter = 0
 while True:
-    
+
     if counter == 2:
         counter = 0
     else:
         counter += 1
-        
+
     # KEEP TRACK OF TIME FOR SENSOR SO IT DOESN'T COLLECT EVERY SINGLE MILLISECOND
     #start_time = time.monotonic()
 
@@ -323,16 +379,6 @@ while True:
         file.write("{},{},{},{},{},{},{},{},{},{},{}\r\n".format(temp_c,hum,photoresistor.value,moisture,lattitude,longitude,altitude,year,month,day,hour))
     time.sleep(0.1)
 
-
-
-
-
-'''
-# Open the file in read mode and read from it
-with open("/sd/sdtest.txt", "r") as file:
-    data = file.read()
-    print(data)
-'''
 
 
 
