@@ -20,7 +20,16 @@ def process_data():
     min_soil_ind = data["soilmoisture"].index(min(data["soilmoisture"]))
     min_soil_lat = data["latitude"][min_soil_ind]
     min_soil_long = data["longitude"][min_soil_ind]
-    return ["yield est: "+str(avg_temp), "water soil at: ("+str(min_soil_lat)+", "+str(min_soil_long)+")", "ideal crop to grow: "+"casava"]
+
+    if sum(data["humidity"])/len(data["humidity"]) > 25:
+        if sum(data["photoresistor"])/len(data["photoresistor"]) > 700:
+            ideal_crop = "coffee"
+        else:
+            ideal_crop = "maize"
+    else:
+        ideal_crop = "cassava"
+
+    return ["yield est (kg): "+str(avg_temp), "water soil at: ("+str(min_soil_lat)+", "+str(min_soil_long)+")", "ideal crop to grow: "+ideal_crop]
 
 def display_info(data_arr, button, prev, down_up, button2):
     
