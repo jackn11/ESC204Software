@@ -310,7 +310,7 @@ while True:
 
 
 
-    gps_is_plugged_in = False
+    gps_is_plugged_in = True
 
     if gps_is_plugged_in:
         gps.update()
